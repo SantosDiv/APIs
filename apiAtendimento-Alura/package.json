@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/SantosDiv/APIs/issues"
   },
-  "homepage": "https://github.com/SantosDiv/APIs#readme"
+  "homepage": "https://github.com/SantosDiv/APIs#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
