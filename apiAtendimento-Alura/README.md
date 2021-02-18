@@ -244,7 +244,7 @@ const conexao = mysql.createConnection({
 
 module.exports = conexao;
 ```
-## Utilizando essa conexão
+## Conectando e utilizando essa conexão que criamos
 Agora que criamos, precisamos utilizar ela. Nós vamos chamar essa conexão no nosso arquivo `index.js`, o arquivo principal.
 
 1. Importe a conexao, do arquivo `conexao.js` com: `const conexao = require('./infraestrutura/conexao)`;
@@ -265,3 +265,32 @@ Agora que criamos, precisamos utilizar ela. Nós vamos chamar essa conexão no n
 ```
 
 Assim, quando rodarmos, vamos ver uma mensagem de log, com o sucesso, ou um erro. Se caso for sucesso, ela virá antes do servidor rodando.
+
+## Criando as Tabelas
+Está ficando lindo. Agora precisamos criar as nossas tabelas, e a melhor forma de fazer isso é criando um script, pois assim nos dá uma automatização da nossa API, pois caso outra pessoa precise usar ela, editar, não será preciso criar 'na mão' e assim evitando erros humanos. Então caso essa tabela não exista, nós iremos pedir para que crie.
+
+1. Dentro da pasta Infraestrutura crie um arquivo chamado `tabelas.js`;
+2. No arquivo tabelas, cós vamos criar uma class chamada `Tabelas`, e é nelas que vamos fazer a criação da nossa tabela. Veja:
+```js
+    class Tabelas {
+        init(conexao) { // O init é um método que está sendo chamado lá no index.js que por sua vez, chama o criarAtendimentos();
+            this.conexao = conexao;
+            this.criarAtendimentos();
+        }
+        // O IF NOT EXISTS serve para que só crie a tabela, caso ela não exista ainda. Assim quando iniciarmos o servidor, ele não vai ficar tentando criar a mesma tabela e não vai dá erros.
+        criarAtendimentos() {
+            const sql = 'CREATE TABLE IF NOT EXISTS Atendimentos (id int NOT NULL AUTO_INCREMENT, cliente varchar(50) NOT NULL, pet varchar(20), servico varchar(20) NOT NULL, status varchar(20) NOT NULL, observacoes text, PRIMARY KEY(id))';
+            this.conexao.query(sql, (erro) => {
+                if(erro) {
+                    console.log(erro);
+                } else {
+                    console.log('Tabela atendimentos criada com sucesso')
+                }
+            });
+        }
+    }
+
+    module.exports = new Tabelas;
+```
+3. Verifique no Workbanch a tabela criada.
+
