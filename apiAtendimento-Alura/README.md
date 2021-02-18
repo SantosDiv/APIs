@@ -101,7 +101,7 @@ Para persistir os dados, ou seja, salvar eles em um banco de dados, nós vamos u
 ## 2.1. Primeiro passo - Instalando o Mysql
 Nós precisaremos instalar tanto no nosso computador, quanto no nosso projeto a dependência mysql no node.
 
-### Instalando localmente
+### 2.1.1. Instalando localmente
 Primeiro vamos instalar na nossa máquina o mysql-server.
    ```sh
     # Primeiro Atualize o apt
@@ -110,7 +110,7 @@ Primeiro vamos instalar na nossa máquina o mysql-server.
     # Segundo instale o mysql
     sudo apt install mysql-server
 ```
-### Testando a instalação
+### 2.1.2. Testando a instalação
 Agora basta testarmos a instalação, vermos se o nosso servidor está rodando, ou ativo. Para isso digite no seu terminal:
 ```sh
 # Verifica o status
@@ -155,7 +155,7 @@ Perfeito! 🤓
 
 Agora que tudo está instalado, e que está inciando quando queremos, vamos colocar uma senha para o nosso servidor mysql. Com ela, nos dá mais segurança e precisaremos dela para o uso do Workbanch.
 
-### Configurando uma senha
+### 2.1.3. Configurando uma senha
 Para colocar uma senha, no seu terminal digite
 ```sh
 sudo -u root -p
@@ -184,10 +184,10 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'sua_senh
 ```
 ⚠️ Atenção! Onde está escrito **sua_senha_aqui**, você vai digitar a senha de sua preferência. É importante você anotar em algum lugar para quando precise utilizar ela. Depois disso é só dar um ENTER e prontinho. Seu servidor está configurado. Seu usuário é o **root** e sua senha é essa que você colocou agora. :)
 
-## Segundo Passo - Instalando o WorkBanch
+## 2.2. Segundo Passo - Instalando o WorkBanch
 Agora que o nosso Mysql está instalado e configurado, vamos instalar o workbanch, que nada mais é que uma ferramenta para visualizarmos melhor as nossas tabelas e os nossos banco de dados. É algo mais visual.
 
-### Instalando - Linux ubunto 20.04
+### 2.2.1. Instalando - Linux ubunto 20.04
 1. Abra o [Link](https://downloads.mysql.com/archives/workbench) para baixar o arquivo.
 2. Escolha a versão do seu linux e faça o download; (Não precisa de login, você pode clicar na opção 'No thanks, just start my download').
 3. No terminal inicalize o instalador que você baixou:
@@ -200,13 +200,68 @@ Agora que o nosso Mysql está instalado e configurado, vamos instalar o workbanc
 
 Prontinho, tudo certo e agora é só começar a usar 🚀
 
-# Usando o Mysql
+# 3. Usando o Mysql
 Agora que está tudo instalado, nós vamos utilizar o mysql no nosso projeto de API de agenda de petshop.
 
-Primeiro, no workbanch vamos criar uma nova conecção com o nome de `agenda_petshop`. Nela vamos entrar e criar um novo `Schemas`, que é onde fica os nossos banco de dados.
+Primeiro, no workbanch vamos criar uma nova conexão com o nome de `agenda_petshop`. Nela vamos entrar e criar um novo `Schemas`, que é onde fica os nossos banco de dados.
 
 Resumindo vamos criar um banco de Dados novo, com o nome de `agenda-petshop`.
 
-## Instalando a dependência do Mysql
+## 3.1. Instalando a dependência do Mysql
 Para podermos utilizar no nosso projeto, o node precisa da dependência do msyql, assim, instale com o comando:
 `npm install mysql`.
+
+
+## Configurando a conexão no projeto
+Nós instalamos a dependência, agora precisamos criar a conexão com o nosso banco de dados, que criamos no Workbanch.
+1. Crie uma pasta chamada `infraestrutura`;
+2. Dentro dela crie um arquivo chamado `conexao.js`;
+3. No arquivo, primeiro importe o mysql com `const mysql = require('mysql');`;
+4. Crie uam variável chamada `conexao` e nela coloque o que tem no próximo passo;
+5. Agora com o mysql importando, podemos criar a nossa conexão com o a função createConnection do próprio mysql. Ela recebe como parâmetro um objeto, que por sua vez são as informações do nosso banco de dados criado. Veja:
+   ```js
+    const conexao = mysql.createConnection({
+        host: 'localhost',
+        port: '3306', // essa porta aqui é a que veio padrão do MySQL, vocẽ pode verificar ela, no seu workbanch;
+        user: 'root',
+        password: 'a_senha_que_você_escolheu',
+        database: 'agenda-petshop' // nome do banco de dados que criamos no workbanch
+    });
+   ```
+6. Por fim, dê um `module.exports = conexao;`;
+
+O arquivo conexao.js fica assim:
+```js
+    const mysql = require('mysql');
+
+const conexao = mysql.createConnection({
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: 'a_senha_que_você_escolheu',
+    database: 'agenda-petshop',
+});
+
+module.exports = conexao;
+```
+## Utilizando essa conexão
+Agora que criamos, precisamos utilizar ela. Nós vamos chamar essa conexão no nosso arquivo `index.js`, o arquivo principal.
+
+1. Importe a conexao, do arquivo `conexao.js` com: `const conexao = require('./infraestrutura/conexao)`;
+2. Conecte usando o método `conect()`, dessa forma: `conexao.connect()`;
+3. Como precisamos saber se a conexão foi um sucesso ou não, vamos adicionar uma função dentro do connect, dessa forma:
+```js
+    conexao.connect(error => {
+        if(error) {
+            console.log(error);
+        } else {
+            console.log('Conectado com sucesso');
+            // Coloque aqui também todo o nosso servidor, e a inicialização do nosso app. Pois queremos que as coisas funcionem apenas quando o nosso banco de dados também estiver funcionando.
+
+            const app = customExpress();
+            app.listen(3000, () => console.log('Servidor rodando na porta 3000'));
+        }
+    });
+```
+
+Assim, quando rodarmos, vamos ver uma mensagem de log, com o sucesso, ou um erro. Se caso for sucesso, ela virá antes do servidor rodando.
