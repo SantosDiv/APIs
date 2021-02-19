@@ -1,9 +1,14 @@
-const conexao = require('../infraestrtura/conections');
+const moment = require('moment');
 
+const conexao = require('../infraestrtura/conections');
 class Atendimento {
     adiciona(atendimento) {
+        const dataCriacao = new Date();
+        const data = moment(atendimento.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:MM:SS');
+        const atendimentoDatado = { ...atendimento, dataCriacao, data };
+
         const sql = 'INSERT INTO Atendimentos SET ?';
-        conexao.query(sql, atendimento, (erro, resultados) => {
+        conexao.query(sql, atendimentoDatado, (erro, resultados) => {
             if (erro) {
                 console.log(erro);
             } else {
