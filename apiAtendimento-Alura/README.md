@@ -335,7 +335,7 @@ Com a tabela criada, vamos adcionar agora os dados enviados pelo nosso cliente, 
    ```
    Tudo certo 👍! Agora você pode ir conferir lá no Workbanch se os dados foram inseridos na sua tabela. (Depois de você ter enviado pelo Postman);
 
-   ## Configurando e enviando Datas
+   ## 3.6. Configurando e enviando Datas
    É certo que como nossa API é de agendamento, precisamos de datas. Saber o dia que vai ser o atendimento e quando foi solicitado. Pois bem, para isso precisamos configurar o formato que essas datas serão enviadas para o nosso DB, pois o formato padrão nele é YYYY-MM-DD. Que é o contrário no nosso querio 🇧🇷.
 
    Para isso, primeiro vamos adicionar estes campos na nossa tabela, já que ainda não existem.
