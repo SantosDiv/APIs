@@ -212,7 +212,7 @@ Para podermos utilizar no nosso projeto, o node precisa da dependência do msyql
 `npm install mysql`.
 
 
-## Configurando a conexão no projeto
+## 3.2. Configurando a conexão no projeto
 Nós instalamos a dependência, agora precisamos criar a conexão com o nosso banco de dados, que criamos no Workbanch.
 1. Crie uma pasta chamada `infraestrutura`;
 2. Dentro dela crie um arquivo chamado `conexao.js`;
@@ -244,7 +244,7 @@ const conexao = mysql.createConnection({
 
 module.exports = conexao;
 ```
-## Conectando e utilizando essa conexão que criamos
+## 3.3. Conectando e utilizando essa conexão que criamos
 Agora que criamos, precisamos utilizar ela. Nós vamos chamar essa conexão no nosso arquivo `index.js`, o arquivo principal.
 
 1. Importe a conexao, do arquivo `conexao.js` com: `const conexao = require('./infraestrutura/conexao)`;
@@ -266,7 +266,7 @@ Agora que criamos, precisamos utilizar ela. Nós vamos chamar essa conexão no n
 
 Assim, quando rodarmos, vamos ver uma mensagem de log, com o sucesso, ou um erro. Se caso for sucesso, ela virá antes do servidor rodando.
 
-## Criando as Tabelas
+## 3.4. Criando as Tabelas
 Está ficando lindo. Agora precisamos criar as nossas tabelas, e a melhor forma de fazer isso é criando um script, pois assim nos dá uma automatização da nossa API, pois caso outra pessoa precise usar ela, editar, não será preciso criar 'na mão' e assim evitando erros humanos. Então caso essa tabela não exista, nós iremos pedir para que crie.
 
 1. Dentro da pasta Infraestrutura crie um arquivo chamado `tabelas.js`;
@@ -294,3 +294,42 @@ Está ficando lindo. Agora precisamos criar as nossas tabelas, e a melhor forma 
 ```
 3. Verifique no Workbanch a tabela criada.
 
+## 3.5. Adicionando dados na tabela
+Com a tabela criada, vamos adcionar agora os dados enviados pelo nosso cliente, dentro desta tabela. Para isso vamos fazer o seguinte:
+1. Crie uma pasta chamada `models`;
+2. Dentro da pasta, crie um arquivo chamado `ModelAtendimento`. Neste arquivo, nós iremos criar a lógia de inserir os dados na tabela.
+3. Faça o requerimento do arquivo de conexão com o DB;
+4. Agora crie uma classe chamada `Atendimento`;
+5. Dentro da classe, você vai criar um método chamado `adciona()`, vai ficar assim:
+   ```js
+    const conexao = require('pasta_do_arquivo/arquivo');
+
+    class Atendimento {
+        adiciona(atendimento) {
+         const sql = 'INSERT INTO nome_da_tabela SET ?';
+         conexao.query(sql, atendimento, (error, resultados) => {
+             if (error) {
+                 console.log(error);
+             } else {
+                 console.log(resultados);
+             }
+         });
+        }
+    }
+
+    module.exports = new Atendimento;
+   ```
+   6. Agora basta ir no arquivo `atendimento.js` e configurar para que, os dados que são enviados pelo nosso cliente, sejam enviados para dentro deste nosso módulo `Atendimento` que acabamos de criar. Veja:
+   ```js
+    const Atendimento = require('./models/modelAtendimento');
+    module.exports = app => {
+        // ..Códigos de get.. //
+
+        // Post
+        app.post('/atendimentos', (req, res) => {
+            Atendimento.adciona(req.body);
+            res.send('Você está na rota atendimentos e fazendo um POST');
+        });
+    }
+   ```
+   Tudo certo 👍! Agora você pode ir conferir lá no Workbanch se os dados foram inseridos na sua tabela. (Depois de você ter enviado pelo Postman);
