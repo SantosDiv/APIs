@@ -7,6 +7,7 @@ Esta API gerencia os atendimentos de um consultório.
 - Consign -> `npm install consign`, para gerenciar as rotas;
 - Body-Parser -> `npm install body-parser`, para fazer com que o nosso servidor entenda os dados enviados pelo body (client). Ex.: urlEncoder, json...
 - Mysql -> `npm install mysql`
+- Moment -> `npm install moment`
 
 
 ## 1.2. Criando a primeira rota
@@ -333,3 +334,42 @@ Com a tabela criada, vamos adcionar agora os dados enviados pelo nosso cliente, 
     }
    ```
    Tudo certo 👍! Agora você pode ir conferir lá no Workbanch se os dados foram inseridos na sua tabela. (Depois de você ter enviado pelo Postman);
+
+   ## Configurando e enviando Datas
+   É certo que como nossa API é de agendamento, precisamos de datas. Saber o dia que vai ser o atendimento e quando foi solicitado. Pois bem, para isso precisamos configurar o formato que essas datas serão enviadas para o nosso DB, pois o formato padrão nele é YYYY-MM-DD. Que é o contrário no nosso querio 🇧🇷.
+
+   Para isso, primeiro vamos adicionar estes campos na nossa tabela, já que ainda não existem.
+   1. Vá no arquivo de `tabelas.js`;
+   2. E atualize o `CRATE TABLE` adicionando os seguintes campos:
+   ```js
+        const sql = 'CREATE TABLE IF NOT EXISTS nome_da_tabela (... data datetime NOT NULL, dataCriacao datetime NOT NULL')
+        // Veja que eu adcionei ao final da tabela os campos data e o dataCriacao, que não os novos campos da nossa tabela.
+   ```
+   3. Após feito isso, salve e vá ao workbanch;
+   4. Apague a tabela antiga (Clique com o botão direito em cima dela e dê um `DROP TABLE`). Você pode usar o `ALTER TABLE`, É MAIS SEGURO! Contudo tive uns erros e tive que partir para medidas drásticas para adicionar estes campos datas.
+   5. Após apagar a tabela, vá no arquivo `tabelas.js` e salve novamente. Assim ele vai criar a nova tabela com os novos campos que acabamos de adcionar;
+   6. Com os campos criados, vamos configurar o formato da data para cadastrar no bando de dados, antes de enviar para ele. Para isso faça: No arquivo  `modelAtendimento.js`
+   ```js
+   // Importe a lib moment() que instalamos
+    const moment = require('moment');
+
+    class Atendimento {
+        adciona(atendimento) {
+        const dataCriacao = new Date();
+        const data = moment(atendimento.data, 'DD-MM-YYYY').format('YYYY-MM-DD HH:MM:SS');
+
+        const atendimentoDatado = {...atendimento, dataCriacao, data};
+
+        const sql = 'INSERT INTO Atendimentos SET ?';
+        conexao.query(sql, atendimentoDatado, (error, resposta) => {
+            if(error) {
+                console.log(error);
+            } else {
+                console.log(resposta);
+            }
+        })
+        }
+    }
+   ```
+
+   Prontinho 😄. Agora, é só ir no Postman e enviar uma data para o atendimento, e ela será salva no seu DB no formato correto e também será salva a data atual, ou seja o momento em que foi feito o pedido.
