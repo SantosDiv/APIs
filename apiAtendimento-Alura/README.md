@@ -406,3 +406,101 @@ Com a tabela criada, vamos adcionar agora os dados enviados pelo nosso cliente, 
         }
     }
     ```
+# 5. Tratando erros
+É importante tratar erros no lado do servidor, pois assim garantimos que não será enviado ou cadastrado nada errado no nosso DB. Impedindo assim que a nossa API quebre. De cara temos duas regras de negócios bem visíveis que precisamos colocar na nossa aplicação: O cliente não pode cadastrar uma data anterior da data atual e o nome dele precisa ter pelo menos 5 caracteres.
+Vamos fazer isso?
+1. Vá no módulo `Atendimento` e faça o seguinte.
+```js
+    const dataCriacao = new Date();
+    const data = moment(atendimento.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:MM:SS');
+
+    // Adicione
+    const dataEhValida = moment(data).isSameOrAfter(dataCriacao); // Aqui eu uso um método do moment que me retorna um TRUE ou FALSE se a data digitada for depois da data de Criação.
+
+    const nomeEhValido = atendimento.client.length >= 5;
+
+    const validacoes = [
+        {
+            nome: 'cliente',
+            valido: nomeEhValido,
+            mensagem: 'O nome não pode ter menos que cinco caracteres',
+        },
+        {
+            nome: 'data',
+            valido: dataEhValida,
+            mensagem: 'A data não pode ser antes da data atual',
+        },
+    ];
+
+    const erros = validacoes.filter(campo => !campo.valido);
+    const existemErros = erros.length;
+
+    if (existemErros) {
+        res.status(400).json(erros);
+    } else {
+        const atendimentoDatado = { ...atendimento, dataCriacao, data };
+
+        const sql = 'INSERT INTO Atendimentos SET ?';
+        conexao.query(sql, atendimentoDatado, (erro, resultados) => {
+            if (erro) {
+                res.status(400).json(erro);
+            } else {
+                res.status(201).json(resultados)
+            }
+        });
+    }
+```
+Observe que agora foi criado um array de objetos com os erros possíveis que mensionamos ateriormente. Fizemos um filtro, se caso a chave `valido` seja Falsa, a constante erros vai ter um elemento e logo vai entrar na condição.
+
+O cadastro no banco só acontece quando tudo ocorre bem, se tiver algum erro não entra no cadastro.
+
+# 6. Listando os dados do nosso DB
+Nós cadastramos os dados, mas precisamos responder esses dados cadastrados para o nosso cliente, caso ele solicite. E vamos fazer isso utilizando o `GET`. Ou seja, ele vai fazer uma requisição por meio de um GET e nós vamos mostrar para ele somente a resposta dessa requisição.
+
+1. Vá no arquivo de rotas (O controlles `atendimento.js`) e nela vamos editar o get da rota atendimento;
+2. ```js
+    app.get('/atendimentos', (req, res) => {
+        Atendimento.lista(res);
+    });
+    ```
+3. Você deve ter percebido que tem um método `lista` no módulo Atendimento que não havíamos falado antes. E de fato não falamos mesmo, ele ainda não existe. Vamos criar agora.
+4. Vá no arquivo `modelAtendimento.js` e coloque esse método:
+   ```js
+   lista(res) {
+       const sql = 'SELECT * FROM Atendimentos';
+       conexao.query(sql, (erro, resultado) => {
+           if(erro) {
+               res.status(400).json(erro);
+           } else {
+               res.status(200).json(resultado);
+           }
+       })
+   }
+   ```
+Prontinho, agora quando solicitarmos via a URL, a rota `/atendimentos`, vai nos dá uma resposta de todos os itens salvos na nossa tabela. Em formato JSON.
+
+## 6.1. Mais um GET
+E se quisermos pegar apenas um cliente? Pelo id dele? Como faremos? Vamos lá!
+1. Vá no arquivo `atendimentos.js` em controllers e adicione mais um get. Assim:
+   ```js
+   app.get('/atendimentos/:id', (req, res) => {
+       const id = parseInt(req.params.id);
+       Atendimento.buscaPorId(id, res);
+   });
+   ```
+   Veja a pequena diferença no caminho da rota. Nós colocamos um `/:id`, ou seja, depois do dois ponto ele pode receber alguma coisa que não sabemos ainda, mas que será digitado pelo cliente. Ainda colocamos um parâmetro de requisição id, para pegar o id. Só transformamos ele em Inteiro, pois no nosso DB está em inteiro.
+2. Vá no `modelAtendiento`, e crie o método `buscaPorId`
+   ```js
+   buscaPorId(id, res) {
+       const sql = `SELECT * FROM Atendimentos WHERE id = ${id}`;
+       conexao.query(sql, (erro, resultado) => {
+           const atendimento = resultado[0]; //Por que a resposta é um array de um único objeto. Ai estamos pegando só o objeto.
+           if (erro) {
+               res.status(400).json(erro);
+           } else {
+               res.status(200).json(atendimento);
+           }
+       })
+   }
+   ```
+Pronto 😊!
