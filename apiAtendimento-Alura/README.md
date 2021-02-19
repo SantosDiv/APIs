@@ -374,7 +374,7 @@ Com a tabela criada, vamos adcionar agora os dados enviados pelo nosso cliente, 
 
    Prontinho 😄. Agora, é só ir no Postman e enviar uma data para o atendimento, e ela será salva no seu DB no formato correto e também será salva a data atual, ou seja o momento em que foi feito o pedido.
 
-   # Configurando a reposta do servidor
+   # 4. Configurando a reposta do servidor
    Todas as vezes que nós fazermos uma requisição ao nosso servidor, ele nos retorna um status de sucesso ou de erro. Quando ele retorna um status `200` significa que deu certo, a requisição foi feita com sucesso. Quando ele retorna com `400` significa que teve um erro no client, ou seja, fizemos uma requisição que não era possível e assim ele deu esse erro.
    Tudo que é 2xx é sucesso, e tudo que é 4xx é erro no client.
 
