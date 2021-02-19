@@ -504,3 +504,34 @@ E se quisermos pegar apenas um cliente? Pelo id dele? Como faremos? Vamos lá!
    }
    ```
 Pronto 😊!
+
+# 7. Atualizando dados da nossa tabela
+Caso seja necessário atualizar algum dado da nossa tabela, nós iremos utilizar o Método HTTP `PATCH`. Poderíamos atualizar com o `PUT`, mas para ser mais semântico, no padrão REST, vamos utilizar o `PATCH`.
+
+Para isso vamos fazer o seguinte
+1. Vá no arquivo de rotas, no controllers (`atendimento.js`);
+2. Nele você vai criar uma nova rota, com o patch.
+   ```js
+    app.patch('/atendimentos/:id', (req, res) => {
+        const id = parseInt(req.params.id);
+        const valores = req.body;
+        Atendimento.altera(id, valore, res);
+    })
+   ```
+3. No módulo `Atendimento`, você vai criar o método `altera()`;
+   ```js
+    altera(id, valores, res) {
+        if (valores.data) {
+            valores.data = moment(valores.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:MM:SS');
+        }
+
+        const sql = 'UPDATE Atendimentos SET ? WHERE id=?';
+        conexao.query(sql, [valores, id], (erro, resultado) => {
+            if (erro) {
+                res.status(400).json(erro);
+            } else {
+                res.status(200).json(resultado);
+            }
+        });
+    }
+   ```

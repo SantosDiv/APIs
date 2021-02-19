@@ -61,6 +61,21 @@ class Atendimento {
             }
         })
     }
+
+    altera(id, valores, res) {
+        if(valores.data) {
+            valores.data = moment(valores.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:MM:SS');
+        }
+        const sql = 'UPDATE Atendimentos SET ? WHERE id=?';
+
+        conexao.query(sql, [valores, id], (error, resultados) => {
+            if(error) {
+                res.status(400).json(error);
+            } else {
+                res.status(200).json(resultados);
+            }
+        })
+    }
 }
 
 module.exports = new Atendimento;
