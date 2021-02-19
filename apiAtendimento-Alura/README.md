@@ -373,3 +373,36 @@ Com a tabela criada, vamos adcionar agora os dados enviados pelo nosso cliente, 
    ```
 
    Prontinho 😄. Agora, é só ir no Postman e enviar uma data para o atendimento, e ela será salva no seu DB no formato correto e também será salva a data atual, ou seja o momento em que foi feito o pedido.
+
+   # Configurando a reposta do servidor
+   Todas as vezes que nós fazermos uma requisição ao nosso servidor, ele nos retorna um status de sucesso ou de erro. Quando ele retorna um status `200` significa que deu certo, a requisição foi feita com sucesso. Quando ele retorna com `400` significa que teve um erro no client, ou seja, fizemos uma requisição que não era possível e assim ele deu esse erro.
+   Tudo que é 2xx é sucesso, e tudo que é 4xx é erro no client.
+
+   Assim, vamos configurar para que quando o nosso cliente fizer uma requisição válida ele nos retorne o sucesso e o contrário retorne uma falha.
+
+   1. Vá no arquivo `atendimento.js` da pasta controllers;
+   2. No post, nós estávamos apenas dando um send com a `res`. Vamos enviar essa res para frente. dessa forma:
+   ```js
+   app.post('/atendimentos', (req, res) => {
+       const atendimento = req.body;
+       Atendimento.adciona(atendimento, res); // Estamos passando essa res para o nosso módulo atendimento.
+   })
+   ```
+   3. No módulo `Atendimento`, faça o seguinte:
+    ```js
+    class Atendimento {
+        adiciona(atendimento, res) {
+            //... Código que não mexemos
+
+            // Código alterado
+            conexao.query(sql, atendimentoDatado, (error, resultado) => {
+                if (error) {
+                    res.status(400).json(error);
+                } else {
+                    // Status 201 é de CREATED, ou seja foi criado com sucesso. Faz mais sentido.
+                    res.status(201).json(resultado);
+                }
+            });
+        }
+    }
+    ```
