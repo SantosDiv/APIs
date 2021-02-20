@@ -535,3 +535,32 @@ Para isso vamos fazer o seguinte
         });
     }
    ```
+# 8. Deletando dados da tabela
+Por fim, vamos adicionar a funcionalidade de deletar dados da nossa tabela. Para isso nós vamos utilizar o método HTTP `DELETE`.
+Vamos lá:
+1. Vá no arquivo de rotas (Controllers/atendimento.js) e crie uma rota do tipo DELETE.
+   ```js
+   app.delete('/atendiemento/:id', (req, res) => {
+       const id = parseInt(req.params.id);
+       Atendimento.deleta(id, res);
+   })
+   ```
+2. Agora vá no módulo Atendimento e faça adicione o método `deleta`:
+   ```js
+    deleta(id, res) {
+        const sql = 'DELETE FROM Atendimentos WHERE id=?';
+        conexao.query(sql, id, (erro, resultado) => {
+            if (erro) {
+                res.status(400).json(erro);
+            } else {
+                res.status(200).json({ id });
+            }
+        })
+    }
+   ```
+   Tudo certo! Agora a nossa API está trabalhando com GET, POST, PATCH e DELETE 🎊;
+
+   # Ultimos ajustes
+   Só para deixar uma reposta mais amigável para o nosso usuário, quando ele faz um puss ou uma atualização, podemos, em vez de retornar uma resposta padrão do mysql, retornar o elemento que foi alterado ou adicionado.
+   Basta ir nos respectivos métodos e fazer essa alteração de resposta. No arquivo está alterado dessa maneira, caso queria ver.
+
